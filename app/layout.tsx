@@ -15,9 +15,24 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const DESCRIPTION =
+  "Three demos that split a problem in two: code does what code is better at, and TypeSafe's Jev answers the part that needs to know what something means.";
+
 export const metadata: Metadata = {
-  title: "2048",
-  description: "Two puzzle games played by TypeSafe's Jev model through the Vercel AI Gateway.",
+  // Required for the opengraph-image files to resolve to absolute URLs, which
+  // is the only kind a social card reader will fetch.
+  metadataBase: new URL("https://lab.saeed.sh"),
+  title: "2048 · Jev",
+  description: DESCRIPTION,
+  // No description here on purpose: each page sets its own, and Next fills
+  // og:description and twitter:description from whichever one resolves.
+  openGraph: {
+    type: "website",
+    siteName: "lab.saeed.sh",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
