@@ -101,6 +101,11 @@ interface AgentPanelProps {
   finished: boolean;
   /** Shown when the run ends in success. */
   success?: React.ReactNode;
+  /**
+   * Shown when the run ends without succeeding. A run that just stops reads as
+   * broken; a run that reports where it got to and why is a result.
+   */
+  verdict?: React.ReactNode;
   startLabel?: string;
   idleHint?: string;
   extraStats?: Array<{ label: string; value: string }>;
@@ -112,6 +117,7 @@ export function AgentPanel({
   formatDelta,
   finished,
   success,
+  verdict,
   startLabel = "Let Jev play",
   idleHint = "Start the agent and the board becomes read-only while Jev plays.",
   extraStats = [],
@@ -163,6 +169,10 @@ export function AgentPanel({
         <div className="rounded-lg bg-emerald-500/10 p-2 text-xs text-emerald-600 dark:text-emerald-400">
           {success}
         </div>
+      ) : null}
+
+      {!success && verdict && finished && moveCount > 0 ? (
+        <div className="bg-muted text-muted-foreground rounded-lg p-2 text-xs">{verdict}</div>
       ) : null}
 
       {agent.error ? (

@@ -186,6 +186,19 @@ export function Game2048({ size = 4 }: { size?: number }) {
             </>
           ) : null
         }
+        verdict={
+          <>
+            <span className="text-foreground font-semibold">
+              Stalled at {state.highest}.
+            </span>{" "}
+            Jev played <span className="font-mono">{agent.log.length}</span> moves in{" "}
+            <span className="font-mono">{formatDuration(agent.elapsedMs)}</span> before the
+            board filled. Code already scores all four moves, so the judgement left over is
+            close to a <span className="font-mono">Math.min</span> — and getting past here
+            needs lookahead, not a better read of the board. This is the wrong game for a
+            model, which is why the other two demos exist.
+          </>
+        }
         idleHint="Start the agent and the board becomes read-only while Jev plays."
       />
     </div>
