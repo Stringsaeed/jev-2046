@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { Tile } from "@/components/game/tile";
+import { cn } from "@/lib/utils";
 import type { Direction, GameState } from "@/lib/game/types";
 
 interface BoardProps {
@@ -10,6 +11,8 @@ interface BoardProps {
   ready: boolean;
   duration: number;
   onSwipe: (direction: Direction) => void;
+  /** False while the agent has the board: the player watches but cannot act. */
+  interactive?: boolean;
   /** Win / game-over panel, rendered above the tiles. */
   overlay?: React.ReactNode;
 }
@@ -22,7 +25,14 @@ interface Metrics {
 /** Minimum pointer travel, in px, before a drag counts as a swipe. */
 const SWIPE_THRESHOLD = 24;
 
-export function Board({ state, ready, duration, onSwipe, overlay }: BoardProps) {
+export function Board({
+  state,
+  ready,
+  duration,
+  onSwipe,
+  overlay,
+  interactive = true,
+}: BoardProps) {
   const { size } = state;
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [metrics, setMetrics] = useState<Metrics>({ cell: 0, gap: 0 });
@@ -49,7 +59,7 @@ export function Board({ state, ready, duration, onSwipe, overlay }: BoardProps) 
 
   useEffect(() => {
     const el = surfaceRef.current?.parentElement;
-    if (!el) return;
+    if (!el || !interactive) return;
 
     const onPointerDown = (event: PointerEvent) => {
       origin.current = { x: event.clientX, y: event.clientY };
@@ -79,14 +89,18 @@ export function Board({ state, ready, duration, onSwipe, overlay }: BoardProps) 
       el.removeEventListener("pointerup", onPointerUp);
       el.removeEventListener("pointercancel", onPointerUp);
     };
-  }, [onSwipe]);
+  }, [onSwipe, interactive]);
 
   const cells = Array.from({ length: size * size }, (_, index) => index);
   const measured = metrics.cell > 0;
 
   return (
     <div
-      className="relative touch-none rounded-2xl p-3 sm:p-4"
+      aria-readonly={!interactive || undefined}
+      className={cn(
+        "relative rounded-2xl p-3 sm:p-4",
+        interactive ? "touch-none" : "cursor-not-allowed",
+      )}
       style={{
         background: "var(--board-bg)",
         boxShadow: "var(--board-shadow)",

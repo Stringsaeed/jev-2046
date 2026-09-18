@@ -42,3 +42,6 @@ next-env.d.ts
 
 # claude code (local, per-machine)
 .claude/settings.local.json
+
+# keep the template, ignore real secrets
+!.env.example

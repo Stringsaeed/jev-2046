@@ -1,4 +1,6 @@
-export type Direction = "up" | "down" | "left" | "right";
+// Re-exported so existing `@/lib/game/types` imports keep working while the
+// sliding puzzle shares the same four directions.
+export type { Direction } from "@/lib/direction";
 
 export type GameStatus = "playing" | "won" | "lost";
 

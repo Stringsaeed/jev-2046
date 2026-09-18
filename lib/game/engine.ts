@@ -159,11 +159,24 @@ export function availableMoves(state: GameState): Direction[] {
   return DIRECTIONS.filter((direction) => canMove(state, direction));
 }
 
+export interface MoveOptions {
+  /**
+   * Whether a new tile appears after the shift. Default true. Pass false to get
+   * only the deterministic part of a move — what an agent needs in order to
+   * compare directions without a random spawn muddying the comparison.
+   */
+  spawn?: boolean;
+}
+
 /**
  * Applies a move. Pure: returns the *same reference* when nothing shifts, so
  * callers can cheaply detect a no-op with `next === state`.
  */
-export function move(state: GameState, direction: Direction): GameState {
+export function move(
+  state: GameState,
+  direction: Direction,
+  { spawn = true }: MoveOptions = {},
+): GameState {
   if (state.status === "lost") return state;
 
   const { size } = state;
@@ -231,7 +244,9 @@ export function move(state: GameState, direction: Direction): GameState {
 
   if (!moved) return state;
 
-  const spawned = spawnTile(grid, state.rngState, nextTileId);
+  const spawned = spawn
+    ? spawnTile(grid, state.rngState, nextTileId)
+    : { tile: null, rngState: state.rngState, nextTileId };
   const tiles = gridToTiles(grid);
   const highest = highestValue(tiles);
 
@@ -267,6 +282,55 @@ export function settle(state: GameState): GameState {
 export function continuePlaying(state: GameState): GameState {
   if (state.status !== "won") return state;
   return { ...state, status: "playing", keepPlaying: true };
+}
+
+/**
+ * Rebuilds a state from a plain value grid. The inverse of `toGrid`, used to
+ * revive a board that crossed a process boundary (the agent route receives a
+ * grid, not a live GameState).
+ */
+export function fromGrid(
+  grid: number[][],
+  init: { score?: number; moves?: number; seed?: number; keepPlaying?: boolean } = {},
+): GameState {
+  const size = grid.length;
+  const tiles: Tile[] = [];
+  let nextTileId = 1;
+
+  for (let row = 0; row < size; row += 1) {
+    for (let col = 0; col < size; col += 1) {
+      const value = grid[row][col];
+      if (!value) continue;
+      tiles.push({
+        id: nextTileId,
+        value,
+        row,
+        col,
+        prevRow: row,
+        prevCol: col,
+        isNew: false,
+        isMerged: false,
+      });
+      nextTileId += 1;
+    }
+  }
+
+  const seed = init.seed ?? 0;
+
+  return {
+    size,
+    tiles,
+    vanished: [],
+    score: init.score ?? 0,
+    gained: 0,
+    highest: highestValue(tiles),
+    status: "playing",
+    keepPlaying: init.keepPlaying ?? false,
+    moves: init.moves ?? 0,
+    rngState: seed,
+    seed,
+    nextTileId,
+  };
 }
 
 /** Plain value grid (0 = empty) — the shape an agent will reason over. */
