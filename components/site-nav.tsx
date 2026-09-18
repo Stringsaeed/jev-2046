@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 const LINKS = [
   { href: "/", label: "2048" },
   { href: "/connections", label: "Connections" },
+  { href: "/highlight", label: "Highlighter" },
 ];
 
 export function SiteNav() {
