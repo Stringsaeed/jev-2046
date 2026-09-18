@@ -127,17 +127,25 @@ export function HighlightPanel({
           />
           <Step
             label="Classify language"
-            detail={detection ? `${detection.modelMs}ms` : "Jev"}
+            detail={detection ? (detection.cached ? "cached" : `${detection.modelMs}ms`) : "Jev"}
             state={stage === "detecting" ? "running" : detection ? "done" : "waiting"}
           />
           <Step
             label="Classify tokens"
-            detail={classification ? `${classification.stats.modelMs}ms` : "Jev"}
+            detail={
+              classification
+                ? classification.cached
+                  ? "cached"
+                  : `${classification.stats.modelMs}ms`
+                : "Jev"
+            }
             state={stage === "classifying" ? "running" : classification ? "done" : "waiting"}
           />
           <Step
             label="Lint"
-            detail={lint ? `${lint.stats.gateMs + lint.stats.lineMs}ms` : "Jev"}
+            detail={
+              lint ? (lint.cached ? "cached" : `${lint.stats.gateMs + lint.stats.lineMs}ms`) : "Jev"
+            }
             state={lintPending ? "running" : lint ? "done" : "waiting"}
           />
         </ol>
@@ -228,6 +236,12 @@ export function HighlightPanel({
             <p className="text-muted-foreground text-[0.7rem]">
               Too many distinct positions to ask about individually, so repeats were collapsed on
               the word alone and each word got one answer for the whole file.
+            </p>
+          )}
+          {(detection?.cached || classification.cached || lint?.cached) && (
+            <p className="text-muted-foreground text-[0.7rem]">
+              A round marked cached asked Jev nothing: the same source in the same language always
+              produces the same questions, so the figures above are what the first run spent.
             </p>
           )}
           {classification.stats.capped && (

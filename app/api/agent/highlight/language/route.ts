@@ -1,3 +1,5 @@
+import { withCache } from "@/lib/agent/cache";
+import { gatewayErrorResponse } from "@/lib/agent/gateway-error";
 import { detectLanguage } from "@/lib/agent/highlight-jev";
 
 import { missingKey, parseSource, readBody } from "../../request";
@@ -21,10 +23,11 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
-    const detection = await detectLanguage(parsed.source);
-    return Response.json({ ...detection, truncated: parsed.truncated });
+    const { value, cached } = await withCache(["language", parsed.source], () =>
+      detectLanguage(parsed.source),
+    );
+    return Response.json({ ...value, cached, truncated: parsed.truncated });
   } catch (error) {
-    console.error("[agent/highlight/language] evaluation failed:", error);
-    return Response.json({ error: "The model call failed." }, { status: 502 });
+    return gatewayErrorResponse("agent/highlight/language", error);
   }
 }

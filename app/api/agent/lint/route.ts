@@ -1,3 +1,5 @@
+import { withCache } from "@/lib/agent/cache";
+import { gatewayErrorResponse } from "@/lib/agent/gateway-error";
 import { lintSource } from "@/lib/agent/lint-jev";
 import { isCommentStyle, isLanguageId } from "@/lib/highlight/languages";
 
@@ -23,13 +25,17 @@ export async function POST(request: Request): Promise<Response> {
   if (!isLanguageId(body.language)) {
     return Response.json({ error: "`language` must be a known language id." }, { status: 400 });
   }
+  const language = body.language;
 
   const commentStyle = isCommentStyle(body.commentStyle) ? body.commentStyle : undefined;
 
   try {
-    return Response.json(await lintSource(parsed.source, body.language, commentStyle));
+    const { value, cached } = await withCache(
+      ["lint", parsed.source, language, commentStyle ?? ""],
+      () => lintSource(parsed.source, language, commentStyle),
+    );
+    return Response.json({ ...value, cached, truncated: parsed.truncated });
   } catch (error) {
-    console.error("[agent/lint] evaluation failed:", error);
-    return Response.json({ error: "The model call failed." }, { status: 502 });
+    return gatewayErrorResponse("agent/lint", error);
   }
 }
