@@ -22,11 +22,14 @@ import type { LintResult, Severity } from "@/lib/lint/types";
 
 export type HighlightStage = "idle" | "detecting" | "classifying" | "done" | "error";
 
+/** Anything the server may have served from cache rather than recomputed. */
+export type Cacheable<T> = T & { cached?: boolean };
+
 export interface HighlighterController {
   stage: HighlightStage;
-  detection: LanguageDetection | null;
-  classification: TokenClassification | null;
-  lint: LintResult | null;
+  detection: Cacheable<LanguageDetection> | null;
+  classification: Cacheable<TokenClassification> | null;
+  lint: Cacheable<LintResult> | null;
   lintPending: boolean;
   /** Kept apart from `error`: the lint can fail without losing the highlighting. */
   lintError: string | null;
@@ -46,6 +49,8 @@ export interface HighlighterController {
 interface Payload {
   error?: string;
   truncated?: boolean;
+  /** True when the server had this answer already and asked Jev nothing. */
+  cached?: boolean;
 }
 
 async function post<T extends Payload>(url: string, body: unknown, signal: AbortSignal) {
@@ -62,9 +67,9 @@ async function post<T extends Payload>(url: string, body: unknown, signal: Abort
 
 export function useHighlighter(): HighlighterController {
   const [stage, setStage] = useState<HighlightStage>("idle");
-  const [detection, setDetection] = useState<LanguageDetection | null>(null);
-  const [classification, setClassification] = useState<TokenClassification | null>(null);
-  const [lint, setLint] = useState<LintResult | null>(null);
+  const [detection, setDetection] = useState<Cacheable<LanguageDetection> | null>(null);
+  const [classification, setClassification] = useState<Cacheable<TokenClassification> | null>(null);
+  const [lint, setLint] = useState<Cacheable<LintResult> | null>(null);
   const [lintPending, setLintPending] = useState(false);
   const [lintError, setLintError] = useState<string | null>(null);
   const [preview, setPreview] = useState<HighlightSpan[] | null>(null);
