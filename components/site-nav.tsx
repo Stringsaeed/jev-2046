@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
-  { href: "/", label: "2048" },
+  // 2048 is disabled: `/` redirects and its agent route is gone. See app/page.tsx.
   { href: "/connections", label: "Connections" },
   { href: "/highlight", label: "Highlighter" },
 ];
