@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import { SiteNav } from "@/components/site-nav";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
@@ -16,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "2048",
-  description: "Play 2048 — join the tiles and reach 2048.",
+  description: "Two puzzle games played by TypeSafe's Jev model through the Vercel AI Gateway.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           enableSystem
           disableTransitionOnChange
         >
+          <SiteNav />
           {children}
         </ThemeProvider>
       </body>
