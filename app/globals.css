@@ -194,3 +194,145 @@
     transition: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Syntax highlighter palette. One variable per role so a span can pick its
+   colour from the role name alone, which is what keeps the renderer from
+   needing a class per role in TS.
+   --------------------------------------------------------------------------- */
+
+:root {
+  --syn-keyword: #cf222e;
+  --syn-type: #953800;
+  --syn-function: #8250df;
+  --syn-property: #0550ae;
+  --syn-constant: #1b7c83;
+  --syn-variable: var(--foreground);
+  --syn-tag: #116329;
+  --syn-other: var(--foreground);
+  --syn-comment: #6e7781;
+  --syn-string: #0a3069;
+  --syn-number: #1b7c83;
+  --syn-punctuation: #57606a;
+  --syn-plain: var(--foreground);
+}
+
+.dark {
+  --syn-keyword: #ff7b72;
+  --syn-type: #ffa657;
+  --syn-function: #d2a8ff;
+  --syn-property: #79c0ff;
+  --syn-constant: #56d4dd;
+  --syn-tag: #7ee787;
+  --syn-comment: #8b949e;
+  --syn-string: #a5d6ff;
+  --syn-number: #56d4dd;
+  --syn-punctuation: #8b949e;
+}
+
+[data-role] {
+  color: var(--syn-color);
+}
+
+[data-role="keyword"] {
+  --syn-color: var(--syn-keyword);
+}
+[data-role="type"] {
+  --syn-color: var(--syn-type);
+}
+[data-role="function"] {
+  --syn-color: var(--syn-function);
+}
+[data-role="property"] {
+  --syn-color: var(--syn-property);
+}
+[data-role="constant"] {
+  --syn-color: var(--syn-constant);
+}
+[data-role="variable"] {
+  --syn-color: var(--syn-variable);
+}
+[data-role="tag"] {
+  --syn-color: var(--syn-tag);
+}
+[data-role="other"] {
+  --syn-color: var(--syn-other);
+}
+[data-role="comment"] {
+  --syn-color: var(--syn-comment);
+  font-style: italic;
+}
+[data-role="string"] {
+  --syn-color: var(--syn-string);
+}
+[data-role="number"] {
+  --syn-color: var(--syn-number);
+}
+[data-role="punctuation"] {
+  --syn-color: var(--syn-punctuation);
+}
+[data-role="plain"] {
+  --syn-color: var(--syn-plain);
+}
+
+/* A token Jev was not sure about. The colour is still applied: the underline
+   reports the uncertainty rather than hiding the answer. */
+[data-uncertain="true"] {
+  text-decoration: underline dotted
+    color-mix(in oklab, var(--syn-color, currentColor) 60%, transparent);
+  text-underline-offset: 3px;
+}
+
+button[data-role]:hover {
+  background-color: color-mix(in oklab, var(--syn-color, currentColor) 16%, transparent);
+  border-radius: 3px;
+}
+
+button[data-role][data-selected="true"] {
+  background-color: color-mix(in oklab, var(--syn-color, currentColor) 22%, transparent);
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--syn-color, currentColor) 45%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+   Lint severities. Same trick as the syntax roles: a line names its severity in
+   a data attribute and the stylesheet supplies the tint, so the renderer never
+   needs to know what a rule is.
+   --------------------------------------------------------------------------- */
+
+:root {
+  --lint-error: #cf222e;
+  --lint-warning: #9a6700;
+  --lint-info: #0550ae;
+}
+
+.dark {
+  --lint-error: #ff7b72;
+  --lint-warning: #d29922;
+  --lint-info: #79c0ff;
+}
+
+/* Every row gets an explicit background so the sticky line-number gutter can
+   inherit it and the code does not scroll underneath the numbers. */
+[data-line] {
+  background-color: var(--card);
+}
+
+[data-line][data-severity="error"] {
+  --lint-color: var(--lint-error);
+}
+[data-line][data-severity="warning"] {
+  --lint-color: var(--lint-warning);
+}
+[data-line][data-severity="info"] {
+  --lint-color: var(--lint-info);
+}
+
+[data-line][data-severity] {
+  background-color: color-mix(in oklab, var(--lint-color) 11%, var(--card));
+  box-shadow: inset 2px 0 0 var(--lint-color);
+}
+
+[data-line][data-active="true"] {
+  background-color: color-mix(in oklab, var(--lint-color, var(--foreground)) 22%, var(--card));
+}
